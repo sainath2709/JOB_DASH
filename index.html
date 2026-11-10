@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FresherJobs 2026 | Automated Job Aggregator & Hyderabad Walk-in Hub</title>
+  <meta name="description" content="Automated Job Aggregator & Walk-in Dashboard for 2025-2026 CSE & Data Science Freshers. Updated twice daily with verified ATS links and Hyderabad walk-in drives." />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Custom CSS -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body class="min-h-screen bg-[#0b0f19] text-slate-100 antialiased selection:bg-indigo-500 selection:text-white flex flex-col justify-between">
+
+  <!-- Top Navigation Header -->
+  <header class="sticky top-0 z-40 bg-[#0b0f19]/85 backdrop-blur-md border-b border-slate-800/80">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <!-- Brand & Batch Badge -->
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-rose-500 flex items-center justify-center font-black text-xl text-white shadow-lg shadow-indigo-500/25">
+          ⚡
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-black tracking-tight text-white">FresherTrack <span class="text-indigo-400">2026</span></h1>
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
+              0-1 YRS / 2025-2026 BATCH
+            </span>
+          </div>
+          <p class="text-xs text-slate-400">Software • Data Science • Hyderabad Walk-in Drives</p>
+        </div>
+      </div>
+
+      <!-- Sync Info & Controls -->
+      <div class="flex items-center gap-2.5 sm:gap-3 flex-wrap justify-end">
+        
+        <!-- Live Sync Pill -->
+        <div class="hidden sm:flex flex-col items-end text-right">
+          <div class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span id="sync-status-indicator">Checking freshness...</span>
+          </div>
+          <span id="next-sync-indicator" class="text-[11px] text-slate-400">Next Auto-Sync: 06:00 PM IST</span>
+        </div>
+
+        <!-- Manual "Sync Now" Button -->
+        <button 
+          id="sync-now-btn"
+          title="Instant refresh from data/jobs.json"
+          class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 hover:border-slate-600 transition-all cursor-pointer shadow-sm active:scale-95"
+        >
+          <svg id="sync-icon" class="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span>Sync Now</span>
+        </button>
+
+        <!-- Export CSV Buttons -->
+        <button 
+          id="export-tracked-btn"
+          class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20 transition-all cursor-pointer active:scale-95"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span>Export Tracked (CSV)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1">
+
+    <!-- KPI Metrics Banner -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mb-6">
+      
+      <!-- Total Jobs -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xl font-bold">
+          💼
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-semibold block uppercase tracking-wider">Total Listings</span>
+          <span id="stat-total-jobs" class="text-xl sm:text-2xl font-black text-white">--</span>
+        </div>
+      </div>
+
+      <!-- New Today -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl font-bold">
+          🔥
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-semibold block uppercase tracking-wider">New Today (&lt;24h)</span>
+          <span id="stat-new-today" class="text-xl sm:text-2xl font-black text-emerald-400">--</span>
+        </div>
+      </div>
+
+      <!-- Hyd Walk-ins -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xl font-bold">
+          📍
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-semibold block uppercase tracking-wider">Hyd Walk-in Drives</span>
+          <span id="stat-walkins" class="text-xl sm:text-2xl font-black text-rose-400">--</span>
+        </div>
+      </div>
+
+      <!-- Tracked / Applied -->
+      <div class="glass-panel rounded-2xl p-4 sm:p-5 flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-violet-500/10 border border-violet-500/30 flex items-center justify-center text-violet-400 text-xl font-bold">
+          🎯
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 font-semibold block uppercase tracking-wider">Tracked / Applied</span>
+          <span id="stat-tracked" class="text-xl sm:text-2xl font-black text-violet-300">--</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Tabs Navigation -->
+    <section class="mb-5">
+      <div class="flex items-center justify-between mb-2">
+        <h2 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Role Categories (Strictly 0-1 Yrs / 2025-2026 Batch)</h2>
+        <span class="text-[11px] text-slate-500 hidden sm:inline">Walk-ins strictly filtered for Hyderabad</span>
+      </div>
+      <div id="category-pills-container" class="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Search & Filter Control Bar (Sticky) -->
+    <section class="glass-panel rounded-2xl p-4 mb-6 space-y-4">
+      
+      <!-- Top Search & Quick Selects Row -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+        
+        <!-- Search Input (Span 6) -->
+        <div class="md:col-span-6 relative">
+          <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
+          <input 
+            type="text" 
+            id="search-input"
+            placeholder="Search by company, title, skills (e.g. C++, Spring Boot, Power BI, Hitec City)..."
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-900/90 text-xs sm:text-sm text-slate-200 placeholder-slate-500 border border-slate-700/80 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+          />
+        </div>
+
+        <!-- Work Mode (Span 2) -->
+        <div class="md:col-span-2">
+          <select 
+            id="filter-work-mode"
+            class="w-full px-3 py-2.5 rounded-xl bg-slate-900/90 text-xs text-slate-300 border border-slate-700/80 focus:border-indigo-500 focus:outline-none cursor-pointer"
+          >
+            <option value="all">Work Mode: All</option>
+            <option value="Remote">Remote Only</option>
+            <option value="Hybrid">Hybrid</option>
+            <option value="Walk-in">Walk-in Drive</option>
+          </select>
+        </div>
+
+        <!-- Batch Filter (Span 2) -->
+        <div class="md:col-span-2">
+          <select 
+            id="filter-batch"
+            class="w-full px-3 py-2.5 rounded-xl bg-slate-900/90 text-xs text-slate-300 border border-slate-700/80 focus:border-indigo-500 focus:outline-none cursor-pointer"
+          >
+            <option value="all">Batch: All Freshers</option>
+            <option value="2026">2026 Batch Only</option>
+            <option value="2025">2025 Batch Only</option>
+          </select>
+        </div>
+
+        <!-- Export All Action (Span 2) -->
+        <div class="md:col-span-2 flex items-center justify-end">
+          <button 
+            id="export-all-btn"
+            class="w-full py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 border border-slate-700 transition-colors flex items-center justify-center gap-1 cursor-pointer"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span>Export View</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bottom Filter Row: Status Pills & Toggles -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-slate-800/80">
+        
+        <!-- Status Filter Pills -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="text-xs text-slate-400 font-semibold mr-1">Status:</span>
+          <div id="status-filter-container" class="flex items-center gap-1.5 flex-wrap">
+            <!-- Dynamic status pills -->
+          </div>
+        </div>
+
+        <!-- Quick Toggles -->
+        <div class="flex items-center gap-4 text-xs font-medium text-slate-300">
+          
+          <!-- Only New Today Toggle -->
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="filter-new-today" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer w-4 h-4" />
+            <span class="flex items-center gap-1">
+              <span class="text-emerald-400">🔥</span> Only New Today
+            </span>
+          </label>
+
+          <!-- Hide Expired Walk-ins Toggle -->
+          <label class="inline-flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="filter-hide-expired" class="rounded bg-slate-900 border-slate-700 text-indigo-600 focus:ring-indigo-500 cursor-pointer w-4 h-4" />
+            <span>Hide Expired Drives</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Count Bar -->
+    <div class="flex items-center justify-between text-xs text-slate-400 mb-4 px-1">
+      <span id="filtered-count">Loading listings...</span>
+      <span class="text-slate-500">Twice-daily sync: 08:00 AM & 06:00 PM IST</span>
+    </div>
+
+    <!-- Job Cards Grid -->
+    <section id="jobs-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <!-- Job cards rendered dynamically by app.js -->
+    </section>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="hidden text-center py-16 px-4 glass-panel rounded-2xl my-6">
+      <div class="text-4xl mb-3">🔍</div>
+      <h3 class="text-lg font-bold text-white mb-1">No matching openings found</h3>
+      <p class="text-xs text-slate-400 max-w-md mx-auto">
+        Try broadening your filters, resetting the search query, or unchecking "Only New Today".
+      </p>
+    </div>
+
+  </main>
+
+  <!-- Walk-in Details Modal -->
+  <div id="walkin-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-[#111827] border border-slate-700 rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div id="walkin-modal-content">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-notification" class="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 text-xs sm:text-sm font-semibold transition-all transform duration-300 translate-y-20 opacity-0 pointer-events-none">
+    <span class="text-indigo-400">ℹ️</span>
+    <span id="toast-text">Notification</span>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800/80 bg-[#070b12] py-8 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <p class="font-bold text-slate-400">FresherTrack 2026 • Automated Job Aggregator & Walk-in Hub</p>
+        <p class="mt-1">Zero Stale Data Guarantee: Synced twice daily at 08:00 AM & 06:00 PM IST via GitHub Actions CI/CD.</p>
+      </div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          SHA256 Deduplication Active
+        </span>
+        <span>•</span>
+        <span>Hyderabad Walk-in Hard Filter</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module" src="assets/js/tracker.js"></script>
+  <script type="module" src="assets/js/export.js"></script>
+  <script type="module" src="assets/js/app.js"></script>
+</body>
+</html>

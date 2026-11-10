@@ -1,0 +1,62 @@
+name: Automated Twice-Daily Job Aggregator & Walk-in Sync
+
+on:
+  schedule:
+    # Runs twice daily at:
+    # 02:30 UTC = 08:00 AM IST (Morning Sync)
+    # 12:30 UTC = 06:00 PM IST (Evening Sync)
+    - cron: '30 2,12 * * *'
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+permissions:
+  contents: write # Allows committing updated jobs.json back to repository
+
+concurrency:
+  group: job-scrape-sync
+  cancel-in-progress: true
+
+jobs:
+  scrape-and-update:
+    runs-on: ubuntu-latest
+    name: Scrape, Deduplicate & Deploy Fresh Listings
+
+    steps:
+      - name: 📥 Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 🐍 Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: 📦 Install optional dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: 🧪 Run Pipeline Unit Tests
+        run: |
+          python -m unittest tests/test_aggregator.py
+
+      - name: 🚀 Run Twice-Daily Scraper & Freshness Engine
+        run: |
+          python scraper/main.py
+
+      - name: 📤 Commit & Push Updated Jobs Data
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/jobs.json
+          
+          # Only commit if data/jobs.json was modified
+          if git diff --staged --quiet; then
+            echo "No changes in job listings. Database is already up to date."
+          else
+            TIMESTAMP=$(date -u "+%Y-%m-%d %H:%M:%S UTC")
+            git commit -m "chore(sync): automated twice-daily job scrape [$TIMESTAMP] [skip ci]"
+            git push origin main || git push
+            echo "Fresh job listings pushed to repository successfully."
+          fi

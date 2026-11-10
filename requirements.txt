@@ -1,0 +1,4 @@
+# Zero mandatory external dependencies required (engine uses Python standard library)
+# Optional dependencies for extended scraping:
+requests>=2.31.0
+beautifulsoup4>=4.12.0

@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "JobAggregatorPayload",
+  "type": "object",
+  "required": ["metadata", "listings"],
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["last_updated_ist", "last_updated_iso", "total_listings", "new_today_count", "category_counts"],
+      "properties": {
+        "last_updated_ist": { "type": "string" },
+        "last_updated_iso": { "type": "string" },
+        "next_scheduled_sync_ist": { "type": "string" },
+        "total_listings": { "type": "integer" },
+        "new_today_count": { "type": "integer" },
+        "active_walkins_count": { "type": "integer" },
+        "expired_walkins_count": { "type": "integer" },
+        "target_batch": { "type": "string" },
+        "target_experience": { "type": "string" },
+        "category_counts": { "type": "object" },
+        "sync_cadence": { "type": "string" }
+      }
+    },
+    "listings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "company_name", "job_title", "category_id",
+          "category_name", "location", "work_mode", "experience",
+          "batch", "apply_url", "post_date", "is_new_today", "is_expired"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "company_name": { "type": "string" },
+          "job_title": { "type": "string" },
+          "category_id": { "type": "string" },
+          "category_name": { "type": "string" },
+          "category_badge_color": { "type": "string" },
+          "location": { "type": "string" },
+          "work_mode": { "type": "string" },
+          "experience": { "type": "string" },
+          "batch": { "type": "string" },
+          "salary_range": { "type": "string" },
+          "apply_url": { "type": "string", "format": "uri" },
+          "portal_type": { "type": "string" },
+          "description": { "type": "string" },
+          "skills": { "type": "array", "items": { "type": "string" } },
+          "post_date": { "type": "string" },
+          "first_discovered_at": { "type": "string" },
+          "last_synced_at": { "type": "string" },
+          "is_new_today": { "type": "boolean" },
+          "is_expired": { "type": "boolean" },
+          "user_status": { "type": "string", "enum": ["Not Applied", "Applied", "Interview", "Rejected"] },
+          "walkin_details": {
+            "type": "object",
+            "properties": {
+              "drive_date": { "type": "string" },
+              "time_slot": { "type": "string" },
+              "venue_address": { "type": "string" },
+              "landmark": { "type": "string" },
+              "contact_person": { "type": "string" },
+              "contact_email": { "type": "string" },
+              "contact_phone": { "type": "string" },
+              "required_docs": { "type": "array", "items": { "type": "string" } },
+              "eligibility_criteria": { "type": "string" },
+              "hiring_process": { "type": "string" },
+              "is_expired": { "type": "boolean" },
+              "expiry_status": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
